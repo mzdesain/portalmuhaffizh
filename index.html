@@ -14,23 +14,66 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
         const firebaseConfig = {
-  apiKey: "AIzaSyDodZJ4yJIRHo1d7fVhK3YoQyFIYToltPw",
-  authDomain: "tahfidzalquran-73c1c.firebaseapp.com",
-  projectId: "tahfidzalquran-73c1c",
-  storageBucket: "tahfidzalquran-73c1c.firebasestorage.app",
-  messagingSenderId: "899264291542",
-  appId: "1:899264291542:web:4998c2f4db8f9cb4249f77"
-};
+            apiKey: "AIzaSyDodZJ4yJIRHo1d7fVhK3YoQyFIYToltPw",
+            authDomain: "tahfidzalquran-73c1c.firebaseapp.com",
+            projectId: "tahfidzalquran-73c1c",
+            storageBucket: "tahfidzalquran-73c1c.firebasestorage.app",
+            messagingSenderId: "899264291542",
+            appId: "1:899264291542:web:4998c2f4db8f9cb4249f77"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         window.db = db;
+        window.auth = auth;
         window.firestore = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, onSnapshot };
+        window.firebaseAuth = { signInWithEmailAndPassword, onAuthStateChanged, signOut };
     </script>
     <style>
+        /* Update di bagian <style> */
+        /* Update CSS untuk Login yang lebih indah */
+/* Perbaikan agar kartu tidak terpotong dan tidak ada scrollbar internal */
+.login-screen {
+    background: radial-gradient(circle at top left, #1e293b, #0f172a);
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center; /* Kartu tepat di tengah vertikal */
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    overflow: hidden; /* Mencegah scroll pada layar utama login */
+}
+
+.glass-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 420px;
+    padding: 2.5rem 2rem;
+    border-radius: 2.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    height: auto; /* Kunci agar kartu mengikuti isi konten */
+    overflow: visible; /* Pastikan logo yang sedikit keluar tidak terpotong */
+}
+.input-focus-effect:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    transform: translateY(-1px);
+}
+
+.login-transition {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+        .hidden-main-content {
+            display: none !important;
+        }
+
         body {
             box-sizing: border-box;
         }
@@ -165,11 +208,67 @@
 </head>
 
 <body class="h-full">
+    <div id="login-page" class="login-screen login-transition">
+    <div class="glass-card login-transition transform shadow-2xl">
+        
+        <div class="text-center mb-8">
+            <div class="inline-block p-1 bg-white rounded-full shadow-lg mb-4">
+                <img src="logo-pondoknya.jpeg" alt="Logo" 
+                     class="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-full">
+            </div>
+            <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">Selamat Datang</h2>
+            <p class="text-gray-500 text-xs sm:text-sm mt-1 font-medium tracking-wide">Sistem Monitoring Tahfidz Santri</p>
+        </div>
+
+        <form id="form-login" class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Email / Username</label>
+                <div class="relative group">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                        <i class="fas fa-envelope text-sm"></i>
+                    </span>
+                    <input type="text" id="username" required 
+                           class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl outline-none input-focus-effect login-transition text-gray-800" 
+                           placeholder="admin@tahfidz.com">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Password Access</label>
+                <div class="relative group">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                        <i class="fas fa-shield-alt text-sm"></i>
+                    </span>
+                    <input type="password" id="password" required 
+                           class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl outline-none input-focus-effect login-transition text-gray-800" 
+                           placeholder="••••••••">
+                </div>
+            </div>
+
+            <button type="submit" id="btn-login" 
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-2xl font-bold transition duration-300 shadow-xl active:scale-[0.98] flex items-center justify-center space-x-3 mt-6">
+                <span>Masuk ke Panel</span>
+                <i class="fas fa-arrow-right text-xs"></i>
+            </button>
+        </form>
+
+        <div class="mt-8 pt-4 border-t border-gray-50 text-center">
+            <div class="flex items-center justify-center space-x-2 text-emerald-600 mb-2">
+                <i class="fas fa-check-circle text-[10px]"></i>
+                <span class="text-[9px] font-bold uppercase tracking-[0.2em]">Secure Encryption Access</span>
+            </div>
+            <p class="text-[9px] text-gray-400 leading-relaxed max-w-[280px] mx-auto uppercase">
+                Akses Terlindungi Sistem Otomatis
+            </p>
+        </div>
+    </div>
+</div>
+
     <div id="app" class="h-full w-full overflow-auto" style="background: #FFFFFF;"><!-- Top Navigation -->
         <nav class="bg-white sticky top-0 z-50 border-b-2">
             <div class="px-3 sm:px-4 py-2 sm:py-3">
                 <div class="flex items-center justify-between mb-2 sm:mb-3">
-                    <div class="flex items-center space-x-2 sm:space-x-3"><img src="logo-pondoknya.jpeg"
+                    <div class="flex items-center space-x-2 sm:space-x-3"><img src="assets\logo-pondoknya.jpeg"
                             alt="Logo Pondok" class="w-10 h-10 sm:w-14 sm:h-14 object-contain flex-shrink-0">
                         <div class="min-w-0">
                             <h1 id="app-title"
@@ -198,6 +297,8 @@
                             class="nav-btn px-2 sm:px-4 py-1.5 sm:py-2 rounded-md bg-gray-200 text-gray-700 text-xs sm:text-sm font-medium whitespace-nowrap hover:bg-gray-300 transition">
                             <i class="fas fa-clock mr-1"></i><span class="hidden sm:inline">Kelola Sesi</span><span
                                 class="sm:hidden">Sesi</span> </button>
+                        <button onclick="window.logout()" class="text-red-500 text-xs px-2"><i
+                                class="fas fa-sign-out-alt"></i> Keluar</button>
                     </div>
                 </div>
             </div>
@@ -980,6 +1081,67 @@
         </footer>
     </div>
     <script type="module">
+        const ADMIN_AUTH = {
+            username: "ustadzlogin",
+            password: "loginustadz321"
+        };
+
+        /* Ganti logika login lama dengan ini */
+/* Update fungsi login untuk mendukung transisi indah */
+document.getElementById('form-login').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const email = document.getElementById('username').value; 
+    const pass = document.getElementById('password').value;
+    const btn = document.getElementById('btn-login');
+    const loginPage = document.getElementById('login-page');
+
+    btn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i> <span>Membuka Kunci...</span>';
+    btn.disabled = true;
+
+    try {
+        await window.firebaseAuth.signInWithEmailAndPassword(window.auth, email, pass);
+        showToast('Akses Diberikan. Memuat Data...');
+        
+        // Efek transisi keluar yang halus
+        loginPage.style.opacity = '0';
+        loginPage.style.transform = 'scale(1.1)';
+        
+        setTimeout(() => {
+            loginPage.classList.add('hidden');
+        }, 400);
+    } catch (error) {
+        console.error(error);
+        showToast('Kredensial tidak valid!', 'error');
+        // Efek getar jika salah
+        const card = document.querySelector('.glass-card');
+        card.classList.add('animate-bounce');
+        setTimeout(() => card.classList.remove('animate-bounce'), 500);
+    } finally {
+        btn.innerHTML = '<span>Masuk ke Panel</span> <i class="fas fa-arrow-right text-xs"></i>';
+        btn.disabled = false;
+    }
+});
+
+// Pantau status login secara real-time
+window.firebaseAuth.onAuthStateChanged(window.auth, (user) => {
+    const loginPage = document.getElementById('login-page');
+    if (user) {
+        loginPage.classList.add('hidden'); // Sembunyikan login jika user sudah masuk
+    } else {
+        loginPage.classList.remove('hidden'); // Tampilkan login jika belum masuk
+    }
+});
+
+// Update fungsi logout
+window.logout = async function () {
+    try {
+        await window.firebaseAuth.signOut(window.auth);
+        location.reload();
+    } catch (error) {
+        showToast('Gagal logout', 'error');
+    }
+}
+
         let pembimbingData = [];
         let santriData = [];
         let tahunAjaranData = [];
@@ -2219,7 +2381,7 @@
                     },
                     hadits: {
                         jumlah: haditsFiltered.length,
-                        totalHadits: tambahanHaditsPeriode,
+                        totalHadits: haditsFiltered.reduce((sum, h) => sum + (parseInt(h.jumlah_hadits) || 0), 0),
                         nilai: hitungPersentaseNilai(haditsFiltered)
                     },
                     mutabaah: {
@@ -2283,10 +2445,12 @@
               </div>
             </div>
             <div class="mt-3 pt-3 border-t border-gray-400">
-              <p class="text-center text-sm text-gray-700">
-                <span class="font-bold text-gray-800">Tambahan pekan ini: ${laporanData.hafalan.totalHalaman} halaman Al-Qur'an, ${laporanData.hadits.totalHadits} hadits</span>
-              </p>
-            </div>
+  <p class="text-center text-sm text-gray-700">
+    <span class="font-bold text-gray-800">
+        Tambahan pekan ini: ${laporanData.hafalan.totalHalaman} halaman Al-Qur'an, ${laporanData.hadits.totalHadits} hadits
+    </span>
+  </p>
+</div>
           </div>
           
           <table class="w-full border-collapse border border-gray-300 text-sm mb-4">
