@@ -15,7 +15,14 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-        /* Kode Config Di Sini */
+        const firebaseConfig = {
+  apiKey: "AIzaSyDOI_3uJqh6Hb2CkIuIGqRspO496NXFpOI",
+  authDomain: "tahfidzsantri-928fd.firebaseapp.com",
+  projectId: "tahfidzsantri-928fd",
+  storageBucket: "tahfidzsantri-928fd.firebasestorage.app",
+  messagingSenderId: "199746493134",
+  appId: "1:199746493134:web:51cf8361631ec0fd430e9f"
+};
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
